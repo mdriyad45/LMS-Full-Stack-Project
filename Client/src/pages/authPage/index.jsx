@@ -1,4 +1,7 @@
+import CommonForm from "@/components/common-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { signupFormControls } from "@/config";
+
 import { GraduationCap } from "lucide-react";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
@@ -8,6 +11,7 @@ const AuthPage = () => {
   const handleTabChange = (value) => {
     setActiveTab(value);
   };
+ 
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center border bg-amber-200">
@@ -31,10 +35,14 @@ const AuthPage = () => {
             Make changes to your signin account here.
           </TabsContent>
           <TabsContent value="signout">
-            Change your signout account here.
+            <CommonForm
+              formControls={signupFormControls}
+              buttonText={"Sign Up"}
+            ></CommonForm>
           </TabsContent>
         </Tabs>
       </div>
+      
     </div>
   );
 };
