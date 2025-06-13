@@ -1,15 +1,21 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const fs = require("fs");
-const path = require("path");
-const logger = require("./src/utils/logger");
+import dotenv from "dotenv";
+import express from "express";
+import cors from"cors";
+import mongoose from "mongoose";
+import fs from  "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import logger from  "./src/utils/logger.js";
+import userRouter from  "./src/router/user.router.js";
 
+dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Ensure logs directory exists
+// Recreate __dirname in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// logs directory 
 const logsDir = path.join(__dirname, "logs");
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
@@ -41,6 +47,9 @@ app.use((err, req, res, next) => {
     message: "Something went wrong",
   });
 });
+
+//user Router
+app.use('/api/v1/user/',userRouter);
 
 mongoose
   .connect(process.env.MONGODB_URI)

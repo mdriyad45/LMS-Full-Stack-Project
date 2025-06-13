@@ -1,23 +1,28 @@
-import userModel from "../models/user.model.js";
+import {User} from "../models/user.model.js";
 import logger from "../utils/logger.js";
+import { validateInputs } from "../utils/validateInputs.js";
 
 export const registerUser = async (req, res) => {
   try {
     const { userName, userEmail, password, role } = req.body;
 
-    const requiredFields = { userName, userEmail, password, role };
-    for (const [field, value] of Object.entries(requiredFields)) {
-      if (!value) {
-        return res.status(400).json({
-          success: false,
-          message: `${field} is required`,
-        });
-      }
-    }
+    // const requiredFields = { userName, userEmail, password, role };
+    // for (const [field, value] of Object.entries(requiredFields)) {
+    //   if (!value) {
+    //     return res.status(400).json({
+    //       success: false,
+    //       message: `${field} is required`,
+    //     });
+    //   }
+    // }
+    
 
-    const existingUser = await userModel.findOne({
-      $or: [{ username }, { userEmail }],
+    validateInputs(userName, userEmail, password);
+
+    const existingUser = await User.findOne({
+      $or: [{ userName }, { userEmail }],
     });
+
 
     if (existingUser) {
       return res.status(400).json({
@@ -26,15 +31,17 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    const user = await userModel.create({
+    const user = await User.create({
       userName,
       userEmail,
       password,
       role,
     });
-    await user.save();
+    
+    
 
-    const createUser = await User.findById(username).select("-password");
+    const createUser = await User.findById(user._id).select("-password");
+
 
     res.status(201).json({
       message: "User create successfully",
