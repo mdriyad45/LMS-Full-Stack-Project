@@ -1,19 +1,18 @@
 import userModel from "../models/user.model.js";
+import logger from "../utils/logger.js";
 
 export const registerUser = async (req, res) => {
   try {
     const { userName, userEmail, password, role } = req.body;
-    if (!userName) {
-      throw new Error("userName not found");
-    }
-    if (!userEmail) {
-      throw new Error("userEmail not found");
-    }
-    if (!password) {
-      throw new Error("password not found");
-    }
-    if (!role) {
-      throw new Error("role not found");
+
+    const requiredFields = { userName, userEmail, password, role };
+    for (const [field, value] of Object.entries(requiredFields)) {
+      if (!value) {
+        return res.status(400).json({
+          success: false,
+          message: `${field} is required`,
+        });
+      }
     }
 
     const existingUser = await userModel.findOne({
@@ -23,11 +22,11 @@ export const registerUser = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({
         succss: false,
-        message: 'User name or user email already exists'
-      })
+        message: "User name or user email already exists",
+      });
     }
 
-    const user = userModel.create({
+    const user = await userModel.create({
       userName,
       userEmail,
       password,
@@ -35,11 +34,20 @@ export const registerUser = async (req, res) => {
     });
     await user.save();
 
+    const createUser = await User.findById(username).select("-password");
+
     res.status(201).json({
       message: "User create successfully",
-      data: user,
+      data: createUser,
       succss: true,
       error: false,
     });
-  } catch (error) {}
+  } catch (error) {
+    logger.error(`Error in registerUser: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Failed to register user",
+      error: error.message,
+    });
+  }
 };
