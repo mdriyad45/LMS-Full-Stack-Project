@@ -8,6 +8,7 @@ const CommonForm = ({
   formControls = [],
   formData,
   setFormData,
+  isButtonDisabled = false
 }) => {
 
    
@@ -19,7 +20,7 @@ const CommonForm = ({
         formData={formData}
         setFormData={setFormData}
       ></FormControl>
-      <Button type="submit">{buttonText || "submit"}</Button>
+      <Button disabled={isButtonDisabled} type="submit" className='mt-5 w-full bg-black text-white'>{buttonText || "submit"}</Button>
     </form>
   );
 };

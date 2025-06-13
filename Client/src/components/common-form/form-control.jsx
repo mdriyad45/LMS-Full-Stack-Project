@@ -13,6 +13,7 @@ import { Label } from "../ui/label";
 const FormControl = ({ formControls = [], formData, setFormData }) => {
   const renderComponentByTypes = (getControlItem) => {
     let element = null;
+    const currentControlItemValue = formData[getControlItem.name] || "";
     switch (getControlItem.componentType) {
       case "input":
         element = (
@@ -21,13 +22,26 @@ const FormControl = ({ formControls = [], formData, setFormData }) => {
             name={getControlItem.name}
             placeholder={getControlItem.placeholder}
             type={getControlItem.componentType}
+            value={currentControlItemValue}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                [getControlItem.name]: e.target.value,
+              })
+            }
           ></Input>
         );
 
         break;
       case "select":
         element = (
-          <Select>
+          <Select
+          onValueChange= {(value)=> setFormData({
+            ...formData,
+            [getControlItem.name] : value
+          })}
+          value={currentControlItemValue}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder={getControlItem.placeholder} />
             </SelectTrigger>
@@ -51,7 +65,13 @@ const FormControl = ({ formControls = [], formData, setFormData }) => {
             name={getControlItem.name}
             placeholder={getControlItem.placeholder}
             type={getControlItem.componentType}
-            value="hello"
+            value={currentControlItemValue}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                [getControlItem.name]: e.target.value,
+              })
+            }
           ></Textarea>
         );
 
@@ -64,11 +84,17 @@ const FormControl = ({ formControls = [], formData, setFormData }) => {
             name={getControlItem.name}
             placeholder={getControlItem.placeholder}
             type={getControlItem.componentType}
+            value={currentControlItemValue}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                [getControlItem.name]: e.target.value,
+              })
+            }
           ></Input>
         );
         break;
     }
-    console.log(element);
     return element;
   };
   return (
