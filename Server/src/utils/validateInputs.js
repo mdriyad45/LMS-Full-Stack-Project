@@ -1,4 +1,5 @@
 import validator from 'validator';
+import logger from './logger.js';
 
 export const validateInputs = (userName, userEmail, password) => {
       if (!userName || !userEmail || !password) {

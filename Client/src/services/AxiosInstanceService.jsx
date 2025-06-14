@@ -1,0 +1,27 @@
+import axiosInstance from "@/api/axiosInstance";
+
+export const registerService = async (formData) => {
+  try {
+    const { data } = await axiosInstance.post("/api/v1/user/register", {
+      ...formData,
+      role: "user",
+    });
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error("Register Error:", error?.response?.data || error.message);
+    throw error?.response?.data || { message: "Registration failed" };
+  }
+};
+
+export const loginService = async (formData) => {
+  try {
+    const { data } = await axiosInstance.post("/api/v1/user/login", {
+      ...formData,
+    });
+    return data;
+  } catch (error) {
+    console.error("Login Error:", error?.response?.data || error.message);
+    throw error?.response?.data || { message: "Login failed" };
+  }
+};

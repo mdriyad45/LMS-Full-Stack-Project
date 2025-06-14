@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { signinFormControls, signupFormControls } from "@/config";
-import { authContext } from "@/context/auth-context";
+import { authContext } from "@/context/auth-context/authContext";
 
 import { GraduationCap } from "lucide-react";
 
@@ -22,6 +22,8 @@ const AuthPage = () => {
     setSignInFormData,
     signUpFormData,
     setSignUpFormData,
+    handleRegisterUser,
+    handleLoginUser
   } = useContext(authContext);
   const handleTabChange = (value) => {
     setActiveTab(value);
@@ -91,6 +93,7 @@ const AuthPage = () => {
                   setFormData={setSignInFormData}
                   buttonText={"Sign In"}
                   isButtonDisabled={!cehckIfSignInFormIsValid()}
+                  handleSubmit={handleLoginUser}
                 ></CommonForm>
               </CardContent>
             </Card>
@@ -110,6 +113,7 @@ const AuthPage = () => {
                   setFormData={setSignUpFormData}
                   isButtonDisabled={!cehckIfSignUpFormIsValid()}
                   buttonText={"Sign UP"}
+                  handleSubmit={handleRegisterUser}
                 ></CommonForm>
               </CardContent>
             </Card>

@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import AuthPage from "./pages/authPage";
+import AuthPage from "./pages/authPage/authPage";
 
 
 

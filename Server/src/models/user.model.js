@@ -1,7 +1,7 @@
-import {mongoose} from 'mongoose';
-import argon2 from 'argon2';
-import logger from "../utils/logger.js"
-
+import  mongoose  from "mongoose";
+import argon2 from "argon2";
+import logger from "../utils/logger.js";
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema(
   {
@@ -21,7 +21,9 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: "student",
+    },
+    refreshToken: {
+      type: String,
     },
   },
   {
@@ -33,6 +35,7 @@ userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     try {
       this.password = await argon2.hash(this.password);
+      next();
     } catch (error) {
       next(error);
     }
@@ -47,6 +50,37 @@ userSchema.methods.isPasswordCorrect = async function (cadidatePassword) {
   } catch (error) {
     logger.error("Password comparison failed");
     throw new Error("Password comparison failed");
+  }
+};
+
+userSchema.methods.generateAccessToken = function () {
+  try {
+    return jwt.sign(
+      {
+        _id: this._id,
+        userEmail: this.userEmail,
+        userName: this.userName,
+        role: this.role,
+      },
+      process.env.ACCESS_TOKEN_EXPIRY_TOKEN_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    );
+  } catch (error) {
+    logger.error(error.message);
+  }
+};
+
+userSchema.methods.generateRefreshToken = function () {
+  try {
+    return jwt.sign(
+      {
+        _id: this._id,
+      },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRY}
+    );
+  } catch (error) {
+    logger.error(error.message);
   }
 };
 
