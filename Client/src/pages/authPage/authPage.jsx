@@ -9,9 +9,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { signinFormControls, signupFormControls } from "@/config";
 import { authContext } from "@/context/auth-context/authContext";
-
 import { GraduationCap } from "lucide-react";
-
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 

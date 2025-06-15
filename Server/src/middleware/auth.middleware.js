@@ -1,13 +1,17 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
-export const authMidleware = async (req, _, next) => {
+export const authMiddleware = async (req, res, next) => {
   try {
     const token =
       req.cookies.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
-      throw new Error("Unauthorized request");
+      return res.status(401).json({
+        success: false,
+        error: true,
+        message: "No token provided",
+      });
     }
 
     const decodeToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -17,14 +21,22 @@ export const authMidleware = async (req, _, next) => {
     );
 
     if (!user) {
-      throw new Error("Invalid Access Token");
+      return res.status(401).json({
+        success: false,
+        error: true,
+        message: "Invalid token user",
+      });
     }
 
     req.user = user;
     next();
   } catch (error) {
     console.error(error);
-    throw new Error("Invalid access Token");
+    return res.status(401).json({
+      success: false,
+      error: true,
+      message: "Invalid or expired token",
+    });
   }
 };
 

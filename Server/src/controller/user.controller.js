@@ -7,8 +7,6 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
     const user = await User.findById(userId);
     const accessToken = user.generateAccessToken();
 
-    console.log(accessToken)
-
     const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
@@ -77,7 +75,6 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { userEmail, password } = req.body;
-    console.log(userEmail, password);
 
     if (!userEmail || !password) {
       logger.error("userName and password must required");
@@ -99,8 +96,6 @@ export const loginUser = async (req, res) => {
     const { accessToken, refreshToken } =
       await generateAccessTokenAndRefreshToken(existUser._id);
 
-      console.log(accessToken, refreshToken);
-
     const loggedInUser = await User.findById(existUser._id).select(
       "-password -refreshToken"
     );
@@ -108,6 +103,8 @@ export const loginUser = async (req, res) => {
     const options = {
       httpOnly: true,
       secure: true,
+      sameSite: "Lax",
+      maxAge: 15 * 60 * 1000,
     };
 
     res
@@ -159,6 +156,32 @@ export const logout = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       message: error.message,
+      success: true,
+      error: false,
+    });
+  }
+};
+
+export const checkAuth = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(400).json({
+        message: "Not authenticated",
+        success: false,
+        error: true,
+      });
+    }
+
+    res.status(200).json({
+      message: "Authenticated user!",
+      data: user,
+      success: true,
+      error: false,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: error.message || error,
       success: true,
       error: false,
     });

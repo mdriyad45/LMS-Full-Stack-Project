@@ -1,14 +1,24 @@
 import { initialSignInFormData, initialSignUPFormData } from "@/config";
-import { loginService, registerService } from "@/services/AxiosInstanceService";
-import { createContext, useState } from "react";
+import Cookies from "js-cookie";
+import {
+  checkAuth,
+  loginService,
+  registerService,
+} from "@/ApiServices/apiAxiosInstanceService";
+import { createContext, useEffect, useState } from "react";
 
 export const authContext = createContext();
 
 export default function AuthProvider({ children }) {
   const [signInFormData, setSignInFormData] = useState(initialSignInFormData);
   const [signUpFormData, setSignUpFormData] = useState(initialSignUPFormData);
+  const [auth, setAuth] = useState({
+    authenticate: false,
+    user: null,
+  });
 
   const handleRegisterUser = async (event) => {
+    event.preventDefault();
     try {
       const data = await registerService(signUpFormData);
       console.log("Registration success:", data);
@@ -21,11 +31,45 @@ export default function AuthProvider({ children }) {
     event.preventDefault();
     try {
       const data = await loginService(signInFormData);
-      console.log("Login success:", data);
+
+      if (data.success) {
+        setAuth({
+          authenticate: true,
+          user: data.data.loggedInUser,
+        });
+      } else {
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
+      }
     } catch (err) {
       console.error("Login failed:", err.message || err);
     }
   };
+
+  const checkAuthentication = async () => {
+    try {
+      const data = await checkAuth();
+      if (data.success) {
+        setAuth({
+          authenticate: true,
+          user: data.data,
+        });
+      } else {
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
+      }
+    } catch (error) {
+      console.error("User not authenticated:", error.message || error);
+    }
+  };
+
+  useEffect(() => {
+    checkAuthentication();
+  }, []);
 
   return (
     <authContext.Provider
@@ -36,6 +80,8 @@ export default function AuthProvider({ children }) {
         setSignUpFormData,
         handleRegisterUser,
         handleLoginUser,
+        checkAuthentication,
+        auth
       }}
     >
       {children}

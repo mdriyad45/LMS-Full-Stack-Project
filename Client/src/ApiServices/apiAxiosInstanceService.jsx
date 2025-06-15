@@ -25,3 +25,13 @@ export const loginService = async (formData) => {
     throw error?.response?.data || { message: "Login failed" };
   }
 };
+
+export const checkAuth = async () => {
+  try {
+    const { data } = await axiosInstance.get("/api/v1/user/check-auth");
+    return data;
+  } catch (error) {
+    console.error("Check Auth Error:", error.message);
+    throw error?.response?.data || { message: "Login failed" };
+  }
+};
