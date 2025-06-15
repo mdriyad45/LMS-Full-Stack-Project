@@ -6,13 +6,12 @@ const ProtectedRoute = ({ authenticated, user, element }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If not logged in and trying to access anything except authPage
     if (!authenticated && !location.pathname.includes("/authPage")) {
       navigate("/authPage");
     }
 
     if (
-      authenticated &&
+      authenticated &&  
       user?.role !== "admin" &&
       location.pathname.includes("/admin")
     ) {
