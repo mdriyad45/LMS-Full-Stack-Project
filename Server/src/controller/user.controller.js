@@ -7,6 +7,8 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
     const user = await User.findById(userId);
     const accessToken = user.generateAccessToken();
 
+    console.log(accessToken)
+
     const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
@@ -97,6 +99,8 @@ export const loginUser = async (req, res) => {
     const { accessToken, refreshToken } =
       await generateAccessTokenAndRefreshToken(existUser._id);
 
+      console.log(accessToken, refreshToken);
+
     const loggedInUser = await User.findById(existUser._id).select(
       "-password -refreshToken"
     );
@@ -121,6 +125,42 @@ export const loginUser = async (req, res) => {
       message: error.message,
       success: false,
       error: true,
+    });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(
+      req.user_id,
+      {
+        $unset: {
+          refreshToken: 1, // this remove the field from document
+        },
+      },
+      {
+        new: true,
+      }
+    );
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json({
+        message: "User logged Out successfully",
+        success: true,
+        error: false,
+      });
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+      success: true,
+      error: false,
     });
   }
 };

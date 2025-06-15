@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { User } from "../models/user.model";
+import { User } from "../models/user.model.js";
 export const authMidleware = async (req, _, next) => {
   try {
     const token =
@@ -24,7 +24,7 @@ export const authMidleware = async (req, _, next) => {
     next();
   } catch (error) {
     console.error(error);
-    throw new apiError(401, "Invalid access Token");
+    throw new Error("Invalid access Token");
   }
 };
 
@@ -40,4 +40,3 @@ export const authorizeRoles = (...allowedRoles) => {
     next();
   };
 };
-
