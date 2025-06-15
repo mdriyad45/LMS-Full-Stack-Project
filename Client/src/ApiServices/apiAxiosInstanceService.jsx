@@ -26,6 +26,16 @@ export const loginService = async (formData) => {
   }
 };
 
+export const logoutService = async () => {
+  try {
+    const { data } = await axiosInstance.get("/api/v1/user/logout");
+    return data;
+  } catch (error) {
+    console.error("Logout Error:", error?.response?.data || error.message);
+    throw error?.response?.data || { message: "Logout failed" };
+  }
+};
+
 export const checkAuth = async () => {
   try {
     const { data } = await axiosInstance.get("/api/v1/user/check-auth");

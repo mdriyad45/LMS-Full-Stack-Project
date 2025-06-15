@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 import {
   checkAuth,
   loginService,
+  logoutService,
   registerService,
 } from "@/ApiServices/apiAxiosInstanceService";
 import { createContext, useEffect, useState } from "react";
@@ -43,8 +44,23 @@ export default function AuthProvider({ children }) {
           user: null,
         });
       }
-    } catch (err) {
-      console.error("Login failed:", err.message || err);
+    } catch (error) {
+      console.error("Login failed:", error.message || error);
+    }
+  };
+
+  const handleLogOutUser = async () => {
+    try {
+      const { data } = await logoutService();
+
+      if (data.success) {
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
+      }
+    } catch (error) {
+      console.error("Logout failed:", error.message || error);
     }
   };
 
@@ -80,8 +96,9 @@ export default function AuthProvider({ children }) {
         setSignUpFormData,
         handleRegisterUser,
         handleLoginUser,
+        handleLogOutUser,
         checkAuthentication,
-        auth
+        auth,
       }}
     >
       {children}
