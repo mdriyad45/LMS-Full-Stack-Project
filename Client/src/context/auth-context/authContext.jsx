@@ -80,12 +80,19 @@ export default function AuthProvider({ children }) {
       }
     } catch (error) {
       console.error("User not authenticated:", error.message || error);
+      if (!error?.response?.data?.success) {
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
+      }
     }
   };
 
   useEffect(() => {
     checkAuthentication();
   }, []);
+  console.log(auth);
 
   return (
     <authContext.Provider
@@ -97,7 +104,6 @@ export default function AuthProvider({ children }) {
         handleRegisterUser,
         handleLoginUser,
         handleLogOutUser,
-        checkAuthentication,
         auth,
       }}
     >

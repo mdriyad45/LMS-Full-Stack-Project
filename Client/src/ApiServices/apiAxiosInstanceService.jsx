@@ -42,6 +42,6 @@ export const checkAuth = async () => {
     return data;
   } catch (error) {
     console.error("Check Auth Error:", error.message);
-    throw error?.response?.data || { message: "Login failed" };
+    throw error?.response?.data || { message: "Check Auth failed" };
   }
 };

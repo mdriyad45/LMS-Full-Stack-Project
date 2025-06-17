@@ -10,24 +10,22 @@ const ProtectedRoute = ({ authenticated, user, element }) => {
       navigate("/authPage");
     }
 
-    if (
-      authenticated &&  
-      user?.role !== "admin" &&
-      location.pathname.includes("/admin")
-    ) {
+    if (authenticated && location.pathname.includes("/authPage")) {
       navigate("/home");
+    }
+    if (authenticated && location.pathname.includes("/instructor")) {
+      if (user?.role !== "instructor") {
+        navigate("/home");
+      }
     }
 
     if (
       authenticated &&
-      user?.role === "admin" &&
-      !location.pathname.includes("/admin")
+      user?.role === "instructor" &&
+      !location.pathname.includes("/instrucotr") &&
+      !location.pathname.includes("/home")
     ) {
-      navigate("/admin");
-    }
-
-    if (authenticated && location.pathname.includes("/authPage")) {
-      navigate("/home");
+      navigate("/instructor");
     }
   }, [authenticated, user, location.pathname, navigate]);
 
