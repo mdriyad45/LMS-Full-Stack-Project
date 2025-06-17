@@ -7,6 +7,7 @@ import {
   registerService,
 } from "@/ApiServices/apiAxiosInstanceService";
 import { createContext, useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const authContext = createContext();
 
@@ -17,6 +18,7 @@ export default function AuthProvider({ children }) {
     authenticate: false,
     user: null,
   });
+  const [loading, setLoading] = useState(false);
 
   const handleRegisterUser = async (event) => {
     event.preventDefault();
@@ -31,6 +33,7 @@ export default function AuthProvider({ children }) {
   const handleLoginUser = async (event) => {
     event.preventDefault();
     try {
+      setLoading(true);
       const data = await loginService(signInFormData);
 
       if (data.success) {
@@ -46,11 +49,14 @@ export default function AuthProvider({ children }) {
       }
     } catch (error) {
       console.error("Login failed:", error.message || error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogOutUser = async () => {
     try {
+      setLoading(true);
       const { data } = await logoutService();
 
       if (data.success) {
@@ -61,11 +67,14 @@ export default function AuthProvider({ children }) {
       }
     } catch (error) {
       console.error("Logout failed:", error.message || error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const checkAuthentication = async () => {
     try {
+      setLoading(true);
       const data = await checkAuth();
       if (data.success) {
         setAuth({
@@ -86,6 +95,8 @@ export default function AuthProvider({ children }) {
           user: null,
         });
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,9 +116,10 @@ export default function AuthProvider({ children }) {
         handleLoginUser,
         handleLogOutUser,
         auth,
+        loading,
       }}
     >
-      {children}
+      {loading ? <Skeleton/> : children}
     </authContext.Provider>
   );
 }
