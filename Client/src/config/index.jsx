@@ -1,40 +1,34 @@
-export const signUpFormControls = [
+export const signupFormControls = [
   {
     name: "userName",
     label: "User Name",
-    placeholder: "Enter your user name",
-    type: "text",
+    placeholder: "Enter your username",
     componentType: "input",
   },
   {
     name: "userEmail",
     label: "User Email",
-    placeholder: "Enter your user email",
-    type: "email",
+    placeholder: "Enter your email",
     componentType: "input",
   },
   {
     name: "password",
-    label: "Password",
-    placeholder: "Enter your password",
-    type: "password",
+    label: "User Password",
+    placeholder: "Enter your Password",
     componentType: "input",
   },
 ];
-
-export const signInFormControls = [
+export const signinFormControls = [
   {
     name: "userEmail",
     label: "User Email",
-    placeholder: "Enter your user email",
-    type: "email",
+    placeholder: "Enter your email",
     componentType: "input",
   },
   {
     name: "password",
-    label: "Password",
-    placeholder: "Enter your password",
-    type: "password",
+    label: "User Password",
+    placeholder: "Enter your Password",
     componentType: "input",
   },
 ];
@@ -43,8 +37,7 @@ export const initialSignInFormData = {
   userEmail: "",
   password: "",
 };
-
-export const initialSignUpFormData = {
+export const initialSignUPFormData = {
   userName: "",
   userEmail: "",
   password: "",
@@ -184,3 +177,4 @@ export const filterOptions = {
   level: courseLevelOptions,
   primaryLanguage: languageOptions,
 };
+
