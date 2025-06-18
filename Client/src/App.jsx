@@ -7,7 +7,7 @@ import { authContext } from "./context/auth-context/authContext";
 import NotFoundPage from "./pages/not_found/NotFoundPage";
 import InstructorDashBoardPage from "./pages/instructor/InstructorDashBoardPage";
 import StudentHomePage from "./pages/student/StudentHomePage";
-import AddNewCoursePage from "./components/instructor_view/AddNewCourse/AddNewCoursePage";
+import AddNewCoursePage from "./pages/instructor/AddNewCourse/AddNewCoursePage";
 
 function App() {
   const { auth } = useContext(authContext);
