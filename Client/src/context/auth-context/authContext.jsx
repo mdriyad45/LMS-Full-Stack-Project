@@ -57,7 +57,8 @@ export default function AuthProvider({ children }) {
   const handleLogOutUser = async () => {
     try {
       setLoading(true);
-      const { data } = await logoutService();
+      const data = await logoutService();
+      console.log(data);
 
       if (data.success) {
         setAuth({

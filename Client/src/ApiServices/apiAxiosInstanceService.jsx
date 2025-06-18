@@ -29,6 +29,7 @@ export const loginService = async (formData) => {
 export const logoutService = async () => {
   try {
     const { data } = await axiosInstance.get("/api/v1/user/logout");
+    console.log(data);
     return data;
   } catch (error) {
     console.error("Logout Error:", error?.response?.data || error.message);

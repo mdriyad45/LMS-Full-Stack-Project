@@ -13,17 +13,19 @@ const ProtectedRoute = ({ authenticated, user, element }) => {
     if (authenticated && location.pathname.includes("/authPage")) {
       navigate("/home");
     }
-    if (authenticated && location.pathname.includes("/instructor")) {
-      if (user?.role !== "instructor") {
-        navigate("/home");
-      }
+    if (
+      authenticated &&
+      user?.role !== "instructor" &&
+      (location.pathname.includes("instructor") ||
+        location.pathname.includes("/auth"))
+    ) {
+      navigate("/home");
     }
 
     if (
       authenticated &&
-      user?.role === "instructor" &&
-      !location.pathname.includes("/instrucotr") &&
-      !location.pathname.includes("/home")
+      user.role === "instructor" &&
+      !location.pathname.includes("instructor")
     ) {
       navigate("/instructor");
     }
