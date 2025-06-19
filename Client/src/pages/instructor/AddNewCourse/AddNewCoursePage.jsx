@@ -12,7 +12,10 @@ const AddNewCoursePage = () => {
     <div className="container mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-extrabold mb-5">Create a new courses</h1>
-        <Button className="text-sm tracking-wider font-bold px-8">
+        <Button className="text-sm tracking-wider font-bold px-8 bg-black text-white 
+              hover:bg-gradient-to-r hover:from-indigo-500 hover:to-purple-600 
+              hover:scale-[1.02] transition-all duration-100 ease-in-out 
+              shadow-md hover:shadow-lg rounded-xl">
           SUBMIT
         </Button>
       </div>

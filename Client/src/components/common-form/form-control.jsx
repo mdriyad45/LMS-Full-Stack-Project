@@ -34,30 +34,34 @@ const FormControl = ({ formControls = [], formData, setFormData }) => {
 
         break;
       case "select":
-        element = (
-          <Select
-          onValueChange= {(value)=> setFormData({
-            ...formData,
-            [getControlItem.name] : value
-          })}
-          value={currentControlItemValue}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={getControlItem.placeholder} />
-            </SelectTrigger>
-            <SelectContent>
-              {getControlItem.options && getControlItem.options.length > 0
-                ? getControlItem.options.map((optionItem) => (
-                    <SelectItem key={optionItem.id}>
-                      {optionItem.label}
-                    </SelectItem>
-                  ))
-                : null}
-            </SelectContent>
-          </Select>
-        );
-
-        break;
+  element = (
+    <Select
+      onValueChange={(value) =>
+        setFormData({
+          ...formData,
+          [getControlItem.name]: value,
+        })
+      }
+      value={currentControlItemValue}
+    >
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder={getControlItem.placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {getControlItem.options && getControlItem.options.length > 0
+          ? getControlItem.options.map((optionItem) => (
+              <SelectItem
+                key={optionItem.id}
+                value={optionItem.value} 
+              >
+                {optionItem.label}
+              </SelectItem>
+            ))
+          : null}
+      </SelectContent>
+    </Select>
+  );
+  break;
       case "textarea":
         element = (
           <Textarea
