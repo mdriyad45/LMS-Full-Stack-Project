@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import logger from "./src/utils/logger.js";
 import userRouter from "./src/router/user.router.js";
 import cookieParser from "cookie-parser";
+import mediaRouter from "./src/router/media.router.js";
 
 dotenv.config();
 const app = express();
@@ -46,6 +47,10 @@ app.use((req, res, next) => {
 
 //user Router
 app.use("/api/v1/user/", userRouter);
+
+//video Router
+
+app.use("/api/v1/video/,",mediaRouter)
 
 
 // Error handling middleware

@@ -1,11 +1,15 @@
-import { getVideoStreamingUrl, uploadVideoController } from "../controller/video.controller"
-import { uploadVideo } from "../middleware/multer.middleware"
+import { Router } from "express";
+import {
+  getVideoStreamingUrl,
+  uploadVideoController,
+} from "../controller/video.controller.js";
+import { uploadVideo } from "../middleware/multer.middleware.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
+
+const router = Router();
 
 
+router.route("/upload").post(authMiddleware,uploadVideo.single('video'),uploadVideoController);
+router.route('/getVideo/:publicId', authMiddleware, getVideoStreamingUrl);
 
-const router = Router()
-
-router.post("/upload", authMiddleware, uploadVideo.single("video"), uploadVideoController)
-router.get("/stream/:publicId", getVideoStreamingUrl)
-
-export default router
+export default router;

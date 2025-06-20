@@ -1,8 +1,8 @@
-import { format } from "winston";
-import cloudinary from "../helper/cloudinary";
+import cloudinary from "../helper/cloudinary.js";
 import logger from "../utils/logger.js";
 
 export const uploadVideoController = async (req, res) => {
+  logger.info("api hit uploadVideoController");
   try {
     const { file } = req;
 
