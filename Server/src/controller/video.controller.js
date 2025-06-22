@@ -2,7 +2,8 @@ import cloudinary from "../helper/cloudinary.js";
 import logger from "../utils/logger.js";
 
 export const uploadVideoController = async (req, res) => {
-  logger.info("api hit uploadVideoController");
+  logger.info("API hit: uploadVideoController");
+
   try {
     const { file } = req;
 
@@ -12,93 +13,80 @@ export const uploadVideoController = async (req, res) => {
         message: "No video file provided",
       });
     }
+
+    // Upload video to Cloudinary
     const result = await cloudinary.uploader.upload(file.path, {
       resource_type: "video",
       folder: "LMS_Learning_Project",
 
-      //Enable adaptive steaming
+      // Enable adaptive streaming
       eager: [
         {
           streaming_profile: "hd",
-          format: "auto",
-          quality: "auto:good",
+          format: "m3u8", // HLS
         },
         {
-          streaming_profile: "sd",
-          format: "auto",
-          quality: "auto:low",
-        },
-        {
-          streaming_profile: "full_hd",
-          formate: "auto",
-          quality: "auto:best",
+          streaming_profile: "hd",
+          format: "mpd", // MPEG-DASH
         },
       ],
-
-      //Enable HLS streaming
       eager_async: true,
 
-      //optimization settings
-
-      video_codec: "auto",
-      audio_codec: "auto",
-
-      // Generate streaming URLs
-
-      streaming_profile: "auto",
-
-      //Additional transformation for different qualities
-
-      transformation: [{ quality: "auto", fetch_formate: "auto" }],
+      // Optimization settings
+      video_codec: "h264",
+      audio_codec: "aac",
     });
 
-    // Generate adaptive streaming URLs
+    console.log(result);
+    // Streaming URLs
+    const publicId = result.public_id;
     const streamingUrls = {
-      //auto quality adjust based on network
-      auto: cloudinary.url(result.public_id, {
-        resource_type: "video",
-        streaming_profile: "auto",
-        quality: "auto",
-        format: "auto",
-      }),
-      // HLS streaming URL for adaptive bitrate
-      hls: cloudinary.url(result.public_id, {
+      hls: cloudinary.url(publicId, {
         resource_type: "video",
         streaming_profile: "hd",
         format: "m3u8",
       }),
-
-      //DASH streaming URL
-      dash: cloudinary.url(result.public_id, {
+      dash: cloudinary.url(publicId, {
         resource_type: "video",
         streaming_profile: "hd",
         format: "mpd",
       }),
-
-      //Different quality versions
+      auto: cloudinary.url(publicId, {
+        resource_type: "video",
+        format: "auto",
+        quality: "auto",
+      }),
       qualities: {
-        low: cloudinary.url(result.public_id, {
+        low: cloudinary.url(publicId, {
           resource_type: "video",
           quality: "auto:low",
-          format: "auto",
+          format: "mp4",
+          video_codec: "h264", 
+          audio_codec: "aac",
         }),
-        medium: cloudinary.url(result.public_id, {
+        medium: cloudinary.url(publicId, {
           resource_type: "video",
           quality: "auto:good",
-          format: "auto",
+          format: "mp4",
+          video_codec: "h264", 
+          audio_codec: "aac",
         }),
-        high: cloudinary.url(result.public_id, {
+        high: cloudinary.url(publicId, {
           resource_type: "video",
           quality: "auto:best",
-          format: "auto",
+          format: "mp4",
+          video_codec: "h264", 
+          audio_codec: "aac",
         }),
       },
     };
 
-    const thumbnail = cloudinary.url(result.public_id, {
+    const thumbnail = cloudinary.url(publicId + ".jpg", {
       resource_type: "video",
-      format: "jpg",
-      transformation: [{ width: 300, height: 200, crop: "fill" }],
+      transformation: [
+        { width: 300, height: 200, crop: "fill" },
+        { flags: "animated", delay: 200 },
+      ],
     });
 
     res.status(200).json({
@@ -106,7 +94,7 @@ export const uploadVideoController = async (req, res) => {
       message: "Video uploaded successfully",
       data: result,
       specific_data: {
-        public_id: result.public_id,
+        public_id: publicId,
         duration: result.duration,
         width: result.width,
         height: result.height,
@@ -117,7 +105,7 @@ export const uploadVideoController = async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error("Video upload failed:", error);
+    logger.error("Video upload failed:", error.message);
     res.status(500).json({
       success: false,
       message: "Video upload failed",

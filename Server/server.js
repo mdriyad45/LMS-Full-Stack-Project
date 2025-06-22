@@ -50,7 +50,7 @@ app.use("/api/v1/user/", userRouter);
 
 //video Router
 
-app.use("/api/v1/video/,",mediaRouter)
+app.use("/api/v1/video/",mediaRouter)
 
 
 // Error handling middleware
