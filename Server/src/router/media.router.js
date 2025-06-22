@@ -1,5 +1,7 @@
 import { Router } from "express";
 import {
+
+  deleteVideoFromCloudinary,
   getVideoStreamingUrl,
   uploadVideoController,
 } from "../controller/video.controller.js";
@@ -10,6 +12,7 @@ const router = Router();
 
 
 router.route("/upload").post(authMiddleware,uploadVideo.single('video'),uploadVideoController);
-router.route('/getVideo/:publicId', authMiddleware, getVideoStreamingUrl);
+router.route("/getVideo/:videoId").get(authMiddleware, getVideoStreamingUrl);
+router.route("/deleteVideo/:videoId").get(authMiddleware, deleteVideoFromCloudinary);
 
 export default router;

@@ -48,7 +48,7 @@ const videoCourseSchema = new mongoose.Schema(
     thumbnail: {
       type: String,
     },
-    uploadBy: {
+    uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,

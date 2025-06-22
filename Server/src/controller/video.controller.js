@@ -1,4 +1,5 @@
 import cloudinary from "../helper/cloudinary.js";
+import { CourseVideo } from "../models/courseVideoMOdel.js";
 import logger from "../utils/logger.js";
 
 export const uploadVideoController = async (req, res) => {
@@ -37,7 +38,6 @@ export const uploadVideoController = async (req, res) => {
       audio_codec: "aac",
     });
 
-    console.log(result);
     // Streaming URLs
     const publicId = result.public_id;
     const streamingUrls = {
@@ -61,21 +61,21 @@ export const uploadVideoController = async (req, res) => {
           resource_type: "video",
           quality: "auto:low",
           format: "mp4",
-          video_codec: "h264", 
+          video_codec: "h264",
           audio_codec: "aac",
         }),
         medium: cloudinary.url(publicId, {
           resource_type: "video",
           quality: "auto:good",
           format: "mp4",
-          video_codec: "h264", 
+          video_codec: "h264",
           audio_codec: "aac",
         }),
         high: cloudinary.url(publicId, {
           resource_type: "video",
           quality: "auto:best",
           format: "mp4",
-          video_codec: "h264", 
+          video_codec: "h264",
           audio_codec: "aac",
         }),
       },
@@ -89,20 +89,26 @@ export const uploadVideoController = async (req, res) => {
       ],
     });
 
+    //save video metadata to the database
+
+    const newVideo = await CourseVideo.create({
+      public_id: publicId,
+      duration: result.duration,
+      width: result.width,
+      height: result.height,
+      format: result.format,
+      bytes: result.bytes,
+      secure_url: result.secure_url,
+      streaming_urls: streamingUrls,
+      thumbnail: thumbnail,
+      uploadedBy: req.user._id,
+    });
+
     res.status(200).json({
       success: true,
       message: "Video uploaded successfully",
-      data: result,
-      specific_data: {
-        public_id: publicId,
-        duration: result.duration,
-        width: result.width,
-        height: result.height,
-        format: result.format,
-        bytes: result.bytes,
-        streaming_urls: streamingUrls,
-        thumbnail,
-      },
+      data: newVideo,
+      cloudinaryResult: result,
     });
   } catch (error) {
     logger.error("Video upload failed:", error.message);
@@ -115,27 +121,117 @@ export const uploadVideoController = async (req, res) => {
 };
 
 export const getVideoStreamingUrl = async (req, res) => {
+  logger.info("API hit: getVideoStreamingUrl");
+
   try {
-    const { public_id } = req.params;
+    const { videoId } = req.params;
     const { quality = "auto" } = req.query;
 
-    //Generate streaming URL based on requested quality
+    if (!videoId) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a video ID",
+      });
+    }
 
-    const streamingUrl = cloudinary.url(public_id, {
+    
+    const video = await CourseVideo.findById(videoId);
+    if (!video) {
+      return res.status(404).json({
+        success: false,
+        message: "Video not found in the database",
+      });
+    }
+
+    const videoPublicId = video.public_id;
+
+    
+    const transformationOptions =
+      quality === "auto"
+        ? {
+            streaming_profile: "auto",
+            format: "auto",
+          }
+        : {
+            streaming_profile: "hd",
+            quality: `auto:${quality}`,
+            format: "mp4",
+          };
+
+    const streamingUrl = cloudinary.url(videoPublicId, {
       resource_type: "video",
-      streaming_profile: quality === "auto" ? "auto" : "hd",
-      quality: `auto:${quality}`,
-      format: "auto",
+      ...transformationOptions,
     });
+
     res.status(200).json({
       success: true,
+      message: "Video URL fetched successfully",
       streaming_url: streamingUrl,
     });
   } catch (error) {
-    logger.error("Failed to generate streaming URL:", error);
+    logger.error("Failed to generate streaming URL:", error.message);
     res.status(500).json({
       success: false,
       message: "Failed to generate streaming URL",
+      error: error.message,
     });
   }
 };
+
+
+export const deleteVideoFromCloudinary = async (req, res) => {
+  logger.info("API hit: deleteVideoController");
+
+  try {
+    const { videoId } = req.params;
+
+    if (!videoId) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide video ID",
+      });
+    }
+
+
+    const video = await CourseVideo.findById(videoId);
+    if (!video) {
+      return res.status(404).json({
+        success: false,
+        message: "Video not found in the database",
+      });
+    }
+
+    const videoPublicId = video.public_id;
+
+
+    await CourseVideo.findByIdAndDelete(videoId);
+    logger.info(`Deleted video metadata from DB: ${videoId}`);
+
+
+    const cloudinaryResponse = await cloudinary.uploader.destroy(videoPublicId, {
+      resource_type: "video",
+    });
+
+    if (cloudinaryResponse.result !== "ok" && cloudinaryResponse.result !== "not found") {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete video from Cloudinary",
+        cloudinaryResponse,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Video deleted successfully from both database and Cloudinary",
+    });
+
+  } catch (error) {
+    logger.error("Error deleting video:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server error while deleting video",
+      error: error.message,
+    });
+  }
+};
+
