@@ -2,23 +2,22 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 
-// ✅ Correctly define the path
-const uploadFolder = path.join(process.cwd(), "uploadVideo");
+// ===== VIDEO UPLOAD =====
+const videoUploadFolder = path.join(process.cwd(), "uploadVideo");
 
-const storage = multer.diskStorage({
+const videoStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // ✅ Check if folder exists, if not create it
-    if (!fs.existsSync(uploadFolder)) {
-      fs.mkdirSync(uploadFolder, { recursive: true });
+    if (!fs.existsSync(videoUploadFolder)) {
+      fs.mkdirSync(videoUploadFolder, { recursive: true });
     }
-    cb(null, uploadFolder); // ✅ Must be a string path
+    cb(null, videoUploadFolder);
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
-const fileFilter = (req, file, cb) => {
+const videoFileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("video/")) {
     cb(null, true);
   } else {
@@ -27,9 +26,40 @@ const fileFilter = (req, file, cb) => {
 };
 
 export const uploadVideo = multer({
-  storage,
-  fileFilter,
+  storage: videoStorage,
+  fileFilter: videoFileFilter,
   limits: {
-    fileSize: 500 * 1024 * 1024, // 500MB max size
+    fileSize: 500 * 1024 * 1024, // 500MB
+  },
+});
+
+// ===== IMAGE UPLOAD =====
+const imageUploadFolder = path.join(process.cwd(), "uploadImage");
+
+const imageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (!fs.existsSync(imageUploadFolder)) {
+      fs.mkdirSync(imageUploadFolder, { recursive: true });
+    }
+    cb(null, imageUploadFolder);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const imageFileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files are allowed!"), false);
+  }
+};
+
+export const uploadImage = multer({
+  storage: imageStorage,
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
   },
 });

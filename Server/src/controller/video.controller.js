@@ -7,6 +7,7 @@ export const uploadVideoController = async (req, res) => {
 
   try {
     const { file } = req;
+    console.log(file);
 
     if (!file) {
       return res.status(400).json({
@@ -120,6 +121,48 @@ export const uploadVideoController = async (req, res) => {
   }
 };
 
+export const uploadImageToCloudinaryController = async (req, res) => {
+  logger.info("api hit uploadImageToCloudinaryController");
+  try {
+    const { file } = req;
+    console.log(file);
+
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        message: "No Image file provided",
+      });
+    }
+    const result = await cloudinary.uploader.upload(file.path, {
+      resource_type: "auto",
+      folder: "LMS_Learning_Project",
+    });
+
+    if(!result){
+      return res.status(400).json({
+        success: false,
+        message: "Cloudinary Image Upload fail",
+      });
+    }
+
+     res.status(200).json({
+      success: true,
+      message: "Image uploaded successfully",
+      data: result,
+      
+    });
+
+  } catch (error) {
+    logger.error("Image upload failed:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Image upload failed",
+      error: error.message,
+    });
+  }
+  
+};
+
 export const getVideoStreamingUrl = async (req, res) => {
   logger.info("API hit: getVideoStreamingUrl");
 
@@ -134,7 +177,6 @@ export const getVideoStreamingUrl = async (req, res) => {
       });
     }
 
-    
     const video = await CourseVideo.findById(videoId);
     if (!video) {
       return res.status(404).json({
@@ -145,7 +187,6 @@ export const getVideoStreamingUrl = async (req, res) => {
 
     const videoPublicId = video.public_id;
 
-    
     const transformationOptions =
       quality === "auto"
         ? {
@@ -178,7 +219,6 @@ export const getVideoStreamingUrl = async (req, res) => {
   }
 };
 
-
 export const deleteVideoFromCloudinary = async (req, res) => {
   logger.info("API hit: deleteVideoController");
 
@@ -192,7 +232,6 @@ export const deleteVideoFromCloudinary = async (req, res) => {
       });
     }
 
-
     const video = await CourseVideo.findById(videoId);
     if (!video) {
       return res.status(404).json({
@@ -203,16 +242,20 @@ export const deleteVideoFromCloudinary = async (req, res) => {
 
     const videoPublicId = video.public_id;
 
-
     await CourseVideo.findByIdAndDelete(videoId);
     logger.info(`Deleted video metadata from DB: ${videoId}`);
 
+    const cloudinaryResponse = await cloudinary.uploader.destroy(
+      videoPublicId,
+      {
+        resource_type: "video",
+      }
+    );
 
-    const cloudinaryResponse = await cloudinary.uploader.destroy(videoPublicId, {
-      resource_type: "video",
-    });
-
-    if (cloudinaryResponse.result !== "ok" && cloudinaryResponse.result !== "not found") {
+    if (
+      cloudinaryResponse.result !== "ok" &&
+      cloudinaryResponse.result !== "not found"
+    ) {
       return res.status(500).json({
         success: false,
         message: "Failed to delete video from Cloudinary",
@@ -224,7 +267,6 @@ export const deleteVideoFromCloudinary = async (req, res) => {
       success: true,
       message: "Video deleted successfully from both database and Cloudinary",
     });
-
   } catch (error) {
     logger.error("Error deleting video:", error.message);
     res.status(500).json({
@@ -234,4 +276,3 @@ export const deleteVideoFromCloudinary = async (req, res) => {
     });
   }
 };
-

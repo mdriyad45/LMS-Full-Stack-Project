@@ -46,3 +46,39 @@ export const checkAuth = async () => {
     throw error?.response?.data || { message: "Check Auth failed" };
   }
 };
+
+export const mediaUploadService = async (formData, onUploadProgress) => {
+  try {
+    const { data } = await axiosInstance.post(
+      "/api/v1/video/upload  ",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: onUploadProgress,
+      }
+    );
+    console.log(data);
+    return data;
+  } catch (error) {
+    throw error.message;
+  }
+};
+export const thumbnailUploadService = async (formData, onUploadProgress) => {
+  try {
+    const { data } = await axiosInstance.post(
+      "/api/v1/video/image/upload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: onUploadProgress,
+      }
+    );
+    return data;
+  } catch (error) {
+    throw error.message;
+  }
+};
