@@ -37,7 +37,9 @@ const CourseCurriculum = () => {
   };
 
   const handleSingleLectureUpload = async (fileOrEvent, index) => {
+    console.log(fileOrEvent);
     const selectedFile = fileOrEvent?.target?.files?.[0] || fileOrEvent;
+    console.log(selectedFile)
     if (!selectedFile) return;
 
     const videoFormData = new FormData();
@@ -60,24 +62,29 @@ const CourseCurriculum = () => {
           public_id: response.data.public_id,
         };
         setCourseCurriculumFormData(updated);
+        console.log(CourseCurriculumFormData);
       }
     } catch (error) {
       console.error("Upload failed:", error.message);
     } finally {
       setMediaUploadProgress(false);
+      
     }
   };
+  //console.log(CourseCurriculumFormData);
 
-  const handleDrop = (e) => {
+  const handleDrop = (e, index) => {
+    //console.log(e);
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    if (file) handleSingleLectureUpload(file);
+    
+    if (file) handleSingleLectureUpload(file, index);
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
   };
-
+console.log(CourseCurriculumFormData)
   return (
     <div>
       <Card>
@@ -88,16 +95,16 @@ const CourseCurriculum = () => {
           <Button onClick={handleNewLecture} className="bg-black text-white mb-4">
             Add Lecture
           </Button>
-          <div onDrop={handleDrop} onDragOver={handleDragOver}>
+          <div>
             {CourseCurriculumFormData.map((item, index) => (
-              <div key={index} className="border p-5 rounded-md mb-3 mt-4">
+              <div onDrop={(e)=> handleDrop(e, index)} onDragOver={handleDragOver} key={index} className="border p-5 rounded-md mb-3 mt-4">
                 <div className="flex gap-5 items-center">
                   <h3>Lecture {index + 1}</h3>
                   <Input
                     name={`title-${index}`}
                     placeholder="Enter lecture title"
                     className="max-w-96"
-                    value={item.title}
+                    
                     onChange={(e) => handleCourseTitleChange(e, index)}
                   />
                   <div className="flex items-center gap-3">

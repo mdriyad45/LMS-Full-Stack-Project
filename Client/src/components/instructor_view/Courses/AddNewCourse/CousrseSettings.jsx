@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InstructorContext } from "@/context/instructor-context/InstructorProvider";
 import React, { useContext, useState } from "react";
+import CourseCurriculum from "./CourseCurriculum ";
+
 
 const CousrseSettings = () => {
   const [uploadPercent, setUploadpercent] = useState(0);
@@ -15,38 +17,33 @@ const CousrseSettings = () => {
   } = useContext(InstructorContext);
 
   const handleThumbnailUpload = async (fileOrEvent) => {
-    const selectedImage = fileOrEvent?.target?.files?.[0] || fileOrEvent;
-    console.log(selectedImage);
+    const selectedFile = fileOrEvent?.target?.files[0] || fileOrEvent;
+    console.log(selectedFile)
+    if(!selectedFile) return ;
 
-    if (selectedImage) {
-      const imageFormData = new FormData();
-      imageFormData.append("image", selectedImage);
-
-      try {
+    try {
         setMediaUploadProgress(true);
         setUploadpercent(0);
 
-        const response = await thumbnailUploadService(
-          imageFormData,
-          (progressEvent) => {
-            const percent = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            setUploadpercent(percent);
-          }
-        );
+        const ImageFormData = new FormData ();
+        ImageFormData.append('image', selectedFile);
 
-        if (response.success) {
-          setCourseLandingFormData({
-            ...courseLandingFormData,
-            image: response.data.secure_url,
-          });
+        const response = await thumbnailUploadService(ImageFormData, (progress)=>{
+            const percent = Math.round((progress.loaded * 100)/progress.total);
+            setUploadpercent(percent);
+        });
+
+        if(response.success){
+            const update = {...courseLandingFormData, image: response.data.secure_url};
+            setCourseLandingFormData(update);
+            
         }
-      } catch (error) {
-        console.warn("Image upload failed:", error.message);
-      } finally {
+
+    } catch (error) {
+        console.warn(error.message);
+    }finally{
         setMediaUploadProgress(false);
-      }
+
     }
   };
 
