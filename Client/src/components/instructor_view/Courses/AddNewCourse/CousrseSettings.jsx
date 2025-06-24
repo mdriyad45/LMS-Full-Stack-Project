@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { InstructorContext } from "@/context/instructor-context/InstructorProvider";
 import React, { useContext, useState } from "react";
 import CourseCurriculum from "./CourseCurriculum ";
-
+import MediaProgressBar from "@/components/MediaProgressBar/MediaProgressBar";
 
 const CousrseSettings = () => {
   const [uploadPercent, setUploadpercent] = useState(0);
@@ -14,36 +14,41 @@ const CousrseSettings = () => {
     setCourseLandingFormData,
     mediaUploadProgess,
     setMediaUploadProgress,
+    mediaUploadProgressPercentage,
+    setMediaUploadProgressPercentage,
   } = useContext(InstructorContext);
 
   const handleThumbnailUpload = async (fileOrEvent) => {
     const selectedFile = fileOrEvent?.target?.files[0] || fileOrEvent;
-    console.log(selectedFile)
-    if(!selectedFile) return ;
+    console.log(selectedFile);
+    if (!selectedFile) return;
 
     try {
-        setMediaUploadProgress(true);
-        setUploadpercent(0);
+      setMediaUploadProgress(true);
+      setUploadpercent(0);
 
-        const ImageFormData = new FormData ();
-        ImageFormData.append('image', selectedFile);
+      const ImageFormData = new FormData();
+      ImageFormData.append("image", selectedFile);
 
-        const response = await thumbnailUploadService(ImageFormData, (progress)=>{
-            const percent = Math.round((progress.loaded * 100)/progress.total);
-            setUploadpercent(percent);
-        });
-
-        if(response.success){
-            const update = {...courseLandingFormData, image: response.data.secure_url};
-            setCourseLandingFormData(update);
-            
+      const response = await thumbnailUploadService(
+        ImageFormData,
+        (progress) => {
+          const percent = Math.round((progress.loaded * 100) / progress.total);
+          setMediaUploadProgressPercentage(percent);
         }
+      );
 
+      if (response.success) {
+        const update = {
+          ...courseLandingFormData,
+          image: response.data.secure_url,
+        };
+        setCourseLandingFormData(update);
+      }
     } catch (error) {
-        console.warn(error.message);
-    }finally{
-        setMediaUploadProgress(false);
-
+      console.warn(error.message);
+    } finally {
+      setMediaUploadProgress(false);
     }
   };
 
@@ -57,6 +62,7 @@ const CousrseSettings = () => {
   const handleDragOver = (e) => {
     e.preventDefault();
   };
+  console.log(courseLandingFormData);
 
   return (
     <div onDrop={handleDrop} onDragOver={handleDragOver}>
@@ -74,6 +80,13 @@ const CousrseSettings = () => {
                 handleThumbnailUpload(event);
               }}
             />
+            {
+                mediaUploadProgess ? (
+                    <MediaProgressBar 
+                    isMediaUploading={mediaUploadProgess}
+                    progressPercentence={mediaUploadProgressPercentage}/>
+                ) : null
+            }
             {courseLandingFormData.image && (
               <img
                 src={courseLandingFormData.image}
@@ -87,7 +100,9 @@ const CousrseSettings = () => {
                 <div
                   className="bg-blue-600 h-full transition-all duration-300"
                   style={{ width: `${uploadPercent}%` }}
-                >{uploadPercent}%</div>
+                >
+                  {mediaUploadProgressPercentage}%
+                </div>
               </div>
             )}
           </div>
