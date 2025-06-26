@@ -59,7 +59,6 @@ export const mediaUploadService = async (formData, onUploadProgress) => {
         onUploadProgress: onUploadProgress,
       }
     );
-    console.log(data);
     return data;
   } catch (error) {
     throw error.message;

@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InstructorContext } from "@/context/instructor-context/InstructorProvider";
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import CourseCurriculum from "./CourseCurriculum ";
 import MediaProgressBar from "@/components/MediaProgressBar/MediaProgressBar";
+import { Button } from "@/components/ui/button";
 
 const CousrseSettings = () => {
-  const [uploadPercent, setUploadpercent] = useState(0);
+
   const {
     courseLandingFormData,
     setCourseLandingFormData,
@@ -25,7 +26,6 @@ const CousrseSettings = () => {
 
     try {
       setMediaUploadProgress(true);
-      setUploadpercent(0);
 
       const ImageFormData = new FormData();
       ImageFormData.append("image", selectedFile);
@@ -73,38 +73,38 @@ const CousrseSettings = () => {
         <CardContent>
           <div>
             <Label>Upload Course Image</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(event) => {
-                handleThumbnailUpload(event);
-              }}
-            />
-            {
-                mediaUploadProgess ? (
-                    <MediaProgressBar 
-                    isMediaUploading={mediaUploadProgess}
-                    progressPercentence={mediaUploadProgressPercentage}/>
-                ) : null
-            }
-            {courseLandingFormData.image && (
-              <img
-                src={courseLandingFormData.image}
-                alt="Preview"
-                className="w-full max-w-xs mt-4 rounded-md shadow-md"
+
+            {courseLandingFormData?.image ? (
+              <div className="flex gap-3">
+                <img
+                  src={courseLandingFormData.image}
+                  alt="Preview"
+                  className="w-full max-w-xs mt-4 rounded-md shadow-md"
+                />
+                <Button className="bg-green-700 text-gray-50">
+                  Replace Video
+                </Button>
+                <Button className="bg-red-800 text-gray-50">
+                  Delete Lecture
+                </Button>
+              </div>
+            ) : (
+              <Input
+                className="mt-3"
+                type="file"
+                accept="image/*"
+                onChange={(event) => {
+                  handleThumbnailUpload(event);
+                }}
               />
             )}
 
-            {mediaUploadProgess && (
-              <div className="mt-4 w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                <div
-                  className="bg-blue-600 h-full transition-all duration-300"
-                  style={{ width: `${uploadPercent}%` }}
-                >
-                  {mediaUploadProgressPercentage}%
-                </div>
-              </div>
-            )}
+            {mediaUploadProgess ? (
+              <MediaProgressBar
+                isMediaUploading={mediaUploadProgess}
+                progressPercentence={mediaUploadProgressPercentage}
+              />
+            ) : null}
           </div>
         </CardContent>
       </Card>

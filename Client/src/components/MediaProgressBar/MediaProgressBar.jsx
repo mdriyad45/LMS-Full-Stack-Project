@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 const MediaProgressBar = ({isMediaUploading, progressPercentence}) => {
+  console.log(progressPercentence);
   const [showProcess, setShowProgress] = useState(false);
   const [animatedProgress, setAnimatedProgress] = useState(0);
 

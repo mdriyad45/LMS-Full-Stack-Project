@@ -1,4 +1,5 @@
 import { mediaUploadService } from "@/ApiServices/apiAxiosInstanceService";
+import MediaProgressBar from "@/components/MediaProgressBar/MediaProgressBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { courseCurriculumInitialFormData } from "@/config";
 import { InstructorContext } from "@/context/instructor-context/InstructorProvider";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 const CourseCurriculum = () => {
+
   const [uploadProgress, setUploadProgress] = useState({});
   const {
     CourseCurriculumFormData,
@@ -39,7 +41,7 @@ const CourseCurriculum = () => {
   const handleSingleLectureUpload = async (fileOrEvent, index) => {
     console.log(fileOrEvent);
     const selectedFile = fileOrEvent?.target?.files?.[0] || fileOrEvent;
-    console.log(selectedFile)
+
     if (!selectedFile) return;
 
     const videoFormData = new FormData();
@@ -49,10 +51,15 @@ const CourseCurriculum = () => {
       setMediaUploadProgress(true);
       setUploadProgress((prev) => ({ ...prev, [index]: 0 }));
 
-      const response = await mediaUploadService(videoFormData, (progressEvent) => {
-        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        setUploadProgress((prev) => ({ ...prev, [index]: percent }));
-      });
+      const response = await mediaUploadService(
+        videoFormData,
+        (progressEvent) => {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress((prev) => ({ ...prev, [index]: percent }));
+        }
+      );
 
       if (response?.success) {
         const updated = [...CourseCurriculumFormData];
@@ -62,29 +69,32 @@ const CourseCurriculum = () => {
           public_id: response.data.public_id,
         };
         setCourseCurriculumFormData(updated);
-        console.log(CourseCurriculumFormData);
       }
     } catch (error) {
       console.error("Upload failed:", error.message);
     } finally {
       setMediaUploadProgress(false);
-      
     }
   };
-  //console.log(CourseCurriculumFormData);
 
   const handleDrop = (e, index) => {
     //console.log(e);
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    
+
     if (file) handleSingleLectureUpload(file, index);
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
   };
-console.log(CourseCurriculumFormData)
+
+  useEffect(()=>{
+    if(mediaUploadProgess && progressRef.current){
+      progressRef.current.scrollIntoView({behavior: "smooth", block: "center"});
+    }
+  },[mediaUploadProgess])
+
   return (
     <div>
       <Card>
@@ -92,57 +102,81 @@ console.log(CourseCurriculumFormData)
           <CardTitle>Create Course Curriculum</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button onClick={handleNewLecture} className="bg-black text-white mb-4">
+          <Button
+            onClick={handleNewLecture}
+            className="bg-black text-white mb-4"
+          >
             Add Lecture
           </Button>
           <div>
             {CourseCurriculumFormData.map((item, index) => (
-              <div onDrop={(e)=> handleDrop(e, index)} onDragOver={handleDragOver} key={index} className="border p-5 rounded-md mb-3 mt-4">
+              <div
+                onDrop={(e) => handleDrop(e, index)}
+                onDragOver={handleDragOver}
+                key={index}
+                className="border p-5 rounded-md mb-3 mt-4"
+              >
                 <div className="flex gap-5 items-center">
                   <h3>Lecture {index + 1}</h3>
                   <Input
                     name={`title-${index}`}
                     placeholder="Enter lecture title"
                     className="max-w-96"
-                    
                     onChange={(e) => handleCourseTitleChange(e, index)}
                   />
                   <div className="flex items-center gap-3">
                     <Switch
                       id={`freePreview-${index}`}
                       checked={item.freePreview}
-                      onCheckedChange={(value) => handleFreePreviewChange(value, index)}
+                      onCheckedChange={(value) =>
+                        handleFreePreviewChange(value, index)
+                      }
                     />
                     <Label htmlFor={`freePreview-${index}`}>Free Preview</Label>
                   </div>
                 </div>
 
                 <div className="mt-6">
-                  <Input
-                    type="file"
-                    accept="video/*"
-                    disabled={uploadProgress[index] > 0 && uploadProgress[index] < 100}
-                    onChange={(e) => handleSingleLectureUpload(e, index)}
-                    className="mb-4"
-                  />
+                  {CourseCurriculumFormData[index]?.videoUrl ? (
+                    <div className="flex gap-3">
+                      <video
+                        src={item.videoUrl}
+                        controls
+                        className="mt-4 w-full max-w-md rounded shadow-md"
+                      />
+                      <Button className="bg-green-700 text-gray-50">
+                        Replace Video
+                      </Button>
+                      <Button className="bg-red-800 text-gray-50">
+                        Delete Lecture
+                      </Button>
+                    </div>
+                  ) : (
+                    <Input
+                      type="file"
+                      accept="video/*"
+                      disabled={
+                        uploadProgress[index] > 0 && uploadProgress[index] < 100
+                      }
+                      onChange={(e) => handleSingleLectureUpload(e, index)}
+                      className="mb-4"
+                    />
+                  )}
 
-                  {uploadProgress[index] > 0 && (
+                  {uploadProgress[index] > 0 && uploadProgress[index] < 100 && (
                     <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden mt-2">
                       <div
                         className="bg-blue-600 h-full text-center text-white text-sm transition-all duration-300"
                         style={{ width: `${uploadProgress[index]}%` }}
                       >
-                        {uploadProgress[index]}%
+                        <MediaProgressBar
+                        
+                        isMediaUploading={mediaUploadProgess}
+                        progressPercentence={uploadProgress[index]}
+                        
+                        />
                       </div>
                     </div>
-                  )}
-
-                  {item.videoUrl && (
-                    <video
-                      src={item.videoUrl}
-                      controls
-                      className="mt-4 w-full max-w-md rounded shadow-md"
-                    />
                   )}
                 </div>
               </div>
