@@ -12,11 +12,9 @@ import React, { useContext, useState } from "react";
 const CourseCurriculum = () => {
   const [uploadProgress, setUploadProgress] = useState({});
   const [uploadingStates, setUploadingStates] = useState({});
-  
-  const { 
-    CourseCurriculumFormData, 
-    setCourseCurriculumFormData 
-  } = useContext(InstructorContext);
+
+  const { CourseCurriculumFormData, setCourseCurriculumFormData } =
+    useContext(InstructorContext);
 
   const handleNewLecture = () => {
     setCourseCurriculumFormData([
@@ -46,9 +44,8 @@ const CourseCurriculum = () => {
     videoFormData.append("video", selectedFile);
 
     try {
-      // Set uploading state for this specific lecture
-      setUploadingStates(prev => ({ ...prev, [index]: true }));
-      setUploadProgress(prev => ({ ...prev, [index]: 0 }));
+      setUploadingStates((prev) => ({ ...prev, [index]: true }));
+      setUploadProgress((prev) => ({ ...prev, [index]: 0 }));
 
       const response = await mediaUploadService(
         videoFormData,
@@ -56,7 +53,7 @@ const CourseCurriculum = () => {
           const percent = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
           );
-          setUploadProgress(prev => ({ ...prev, [index]: percent }));
+          setUploadProgress((prev) => ({ ...prev, [index]: percent }));
         }
       );
 
@@ -72,9 +69,8 @@ const CourseCurriculum = () => {
     } catch (error) {
       console.error("Upload failed:", error.message);
     } finally {
-      // Clear uploading state after delay to allow completion animation
       setTimeout(() => {
-        setUploadingStates(prev => ({ ...prev, [index]: false }));
+        setUploadingStates((prev) => ({ ...prev, [index]: false }));
       }, 1000);
     }
   };
@@ -96,7 +92,10 @@ const CourseCurriculum = () => {
           <CardTitle>Create Course Curriculum</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button onClick={handleNewLecture} className="bg-black text-white mb-4 hover:bg-gray-800">
+          <Button
+            onClick={handleNewLecture}
+            className="bg-black text-white mb-4 hover:bg-gray-800"
+          >
             Add Lecture
           </Button>
           <div>
@@ -120,7 +119,9 @@ const CourseCurriculum = () => {
                     <Switch
                       id={`freePreview-${index}`}
                       checked={item.freePreview}
-                      onCheckedChange={(value) => handleFreePreviewChange(value, index)}
+                      onCheckedChange={(value) =>
+                        handleFreePreviewChange(value, index)
+                      }
                     />
                     <Label htmlFor={`freePreview-${index}`}>Free Preview</Label>
                   </div>
@@ -129,18 +130,21 @@ const CourseCurriculum = () => {
                 <div className="mt-6">
                   {item.videoUrl ? (
                     <div className="flex gap-3">
-                      <video src={item.videoUrl} controls className="mt-4 w-full max-w-md rounded shadow-md" />
+                      <video
+                        src={item.videoUrl}
+                        controls
+                        className="mt-4 w-full max-w-md rounded shadow-md"
+                      />
                       <Button
                         className="bg-green-700 text-gray-50"
                         onClick={() => {
-                          // Clear existing video to allow re-upload
-                          const updated = [...CourseCurriculumFormData]
+                          const updated = [...CourseCurriculumFormData];
                           updated[index] = {
                             ...updated[index],
                             videoUrl: null,
                             public_id: null,
-                          }
-                          setCourseCurriculumFormData(updated)
+                          };
+                          setCourseCurriculumFormData(updated);
                         }}
                       >
                         Replace Video
@@ -148,9 +152,9 @@ const CourseCurriculum = () => {
                       <Button
                         className="bg-red-800 text-gray-50"
                         onClick={() => {
-                          const updated = [...CourseCurriculumFormData]
-                          updated.splice(index, 1)
-                          setCourseCurriculumFormData(updated)
+                          const updated = [...CourseCurriculumFormData];
+                          updated.splice(index, 1);
+                          setCourseCurriculumFormData(updated);
                         }}
                       >
                         Delete Lecture
@@ -158,10 +162,14 @@ const CourseCurriculum = () => {
                     </div>
                   ) : (
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      {/* Video Icon */}
                       <div className="flex justify-center mb-4">
                         <div className="w-12 h-12 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
-                          <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg
+                            className="w-6 h-6 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -172,14 +180,15 @@ const CourseCurriculum = () => {
                         </div>
                       </div>
 
-                      {/* File Input */}
                       <div className="space-y-3">
                         <div className="relative inline-block">
                           <Input
                             type="file"
                             accept="video/*"
                             disabled={uploadingStates[index]}
-                            onChange={(e) => handleSingleLectureUpload(e, index)}
+                            onChange={(e) =>
+                              handleSingleLectureUpload(e, index)
+                            }
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           />
                           <button
@@ -188,19 +197,20 @@ const CourseCurriculum = () => {
                           >
                             Choose file
                           </button>
-                         
                         </div>
 
-                        {/* Drag and Drop Text */}
                         <div className="space-y-1">
-                          <p className="text-gray-600">Or drag and drop a video file here</p>
-                          <p className="text-sm text-gray-400">Supported: MP4, AVI, MOV, WebM (Max 100MB)</p>
+                          <p className="text-gray-600">
+                            Or drag and drop a video file here
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            Supported: MP4, AVI, MOV, WebM (Max 100MB)
+                          </p>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Always render progress bar - it will handle its own visibility */}
                   <MediaProgressBar
                     isMediaUploading={uploadingStates[index]}
                     progressPercentence={uploadProgress[index] || 0}

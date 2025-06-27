@@ -87,7 +87,7 @@ const CousrseSettings = () => {
               </div>
             ) : (
               <div className="mt-4 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-                {/* Image Icon */}
+            
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@ const CousrseSettings = () => {
                   </div>
                 </div>
 
-                {/* File Input */}
+              
                 <div className="space-y-4">
                   <div className="relative inline-block">
                     <Input
@@ -118,7 +118,7 @@ const CousrseSettings = () => {
                     <span className="ml-3 text-gray-500">No file chosen</span>
                   </div>
 
-                  {/* Drag and Drop Text */}
+                
                   <div className="space-y-1">
                     <p className="text-gray-600">Or drag and drop an image file here</p>
                     <p className="text-sm text-gray-400">Supported: JPEG, PNG, GIF, WebP (Max 5MB)</p>
