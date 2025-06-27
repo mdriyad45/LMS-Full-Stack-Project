@@ -14,7 +14,7 @@ const router = Router();
 
 router.route("/upload").post(authMiddleware,uploadVideo.single('video'),uploadVideoController);
 router.route("/getVideo/:videoId").get(authMiddleware, getVideoStreamingUrl);
-router.route("/deleteVideo/:videoId").get(authMiddleware, deleteVideoFromCloudinary);
+router.route("/deleteVideo/:videoId").delete(authMiddleware, deleteVideoFromCloudinary);
 router.route('/image/upload').post(authMiddleware,uploadImage.single('image'),uploadImageToCloudinaryController)
 
 export default router;

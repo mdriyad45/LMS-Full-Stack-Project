@@ -81,3 +81,14 @@ export const thumbnailUploadService = async (formData, onUploadProgress) => {
     throw error.message;
   }
 };
+
+export const removeVideoService = async (publicId) => {
+  try {
+    const { data } = await axiosInstance.delete(
+      `/api/v1/video/deleteVideo/${publicId}`
+    );
+    return data;
+  } catch (error) {
+    console.error(error.message);
+  }
+};

@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 const MediaProgressBar = ({isMediaUploading, progressPercentence}) => {
-  console.log(isMediaUploading);
-  console.log(isMediaUploading);
   
   const [showProcess, setShowProgress] = useState(false);
   const [animatedProgress, setAnimatedProgress] = useState(0);
@@ -15,7 +13,7 @@ const MediaProgressBar = ({isMediaUploading, progressPercentence}) => {
     } else {
       const timer = setTimeout(() => {
         setShowProgress(false);
-      }, 1000);
+      }, 500);
 
       return () => {
         clearTimeout(timer);

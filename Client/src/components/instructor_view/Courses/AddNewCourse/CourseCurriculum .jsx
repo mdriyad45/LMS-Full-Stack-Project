@@ -1,4 +1,4 @@
-import { mediaUploadService } from "@/ApiServices/apiAxiosInstanceService";
+import { mediaUploadService, removeVideoService } from "@/ApiServices/apiAxiosInstanceService";
 import MediaProgressBar from "@/components/MediaProgressBar/MediaProgressBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import React, { useContext, useState } from "react";
 const CourseCurriculum = () => {
   const [uploadProgress, setUploadProgress] = useState({});
   const [uploadingStates, setUploadingStates] = useState({});
+  const [uploading, setUploading] = useState(false);
 
   const { CourseCurriculumFormData, setCourseCurriculumFormData } =
     useContext(InstructorContext);
@@ -46,6 +47,7 @@ const CourseCurriculum = () => {
     try {
       setUploadingStates((prev) => ({ ...prev, [index]: true }));
       setUploadProgress((prev) => ({ ...prev, [index]: 0 }));
+      setUploading(true);
 
       const response = await mediaUploadService(
         videoFormData,
@@ -63,12 +65,14 @@ const CourseCurriculum = () => {
           ...updated[index],
           videoUrl: response.data.secure_url,
           public_id: response.data.public_id,
+          video_id: response.data._id,
         };
         setCourseCurriculumFormData(updated);
       }
     } catch (error) {
       console.error("Upload failed:", error.message);
     } finally {
+      setUploading(false);
       setTimeout(() => {
         setUploadingStates((prev) => ({ ...prev, [index]: false }));
       }, 1000);
@@ -85,6 +89,36 @@ const CourseCurriculum = () => {
     e.preventDefault();
   };
 
+  const isCourseFormDataValid = () => {
+    return CourseCurriculumFormData.every((item) => {
+      return (
+        item &&
+        typeof item === "object" &&
+        item.title.trim() === "" &&
+        item.videoUrl.trim() === ""
+      );
+    });
+  };
+  
+  const handleReplaceVideo = async (currentIndex)=>{
+    let copyCourseCurriculumFormData = [...CourseCurriculumFormData];
+    const getCurrentVideoId = copyCourseCurriculumFormData[currentIndex].video_id;
+    console.log(getCurrentVideoId);
+    const responseData = await removeVideoService(getCurrentVideoId);
+    console.log(responseData);
+    if(responseData.success){
+      const updated = [...CourseCurriculumFormData];
+      updated[currentIndex] = {
+        ...updated[currentIndex],
+        videoUrl: "",
+        public_id: "",
+        video_id: "",
+      }
+      setCourseCurriculumFormData(updated);
+    }
+    
+  }
+  console.log(CourseCurriculumFormData)
   return (
     <div className="max-w-9xl mx-auto p-4">
       <Card>
@@ -94,6 +128,7 @@ const CourseCurriculum = () => {
         <CardContent>
           <Button
             onClick={handleNewLecture}
+            disabled={!isCourseFormDataValid || uploading}
             className="bg-black text-white mb-4 hover:bg-gray-800"
           >
             Add Lecture
@@ -133,19 +168,11 @@ const CourseCurriculum = () => {
                       <video
                         src={item.videoUrl}
                         controls
-                        className="mt-4 w-full max-w-md rounded shadow-md"
+                        className="mt-4 w-max-7xl h-96 max-w-md rounded shadow-md"
                       />
                       <Button
                         className="bg-green-700 text-gray-50"
-                        onClick={() => {
-                          const updated = [...CourseCurriculumFormData];
-                          updated[index] = {
-                            ...updated[index],
-                            videoUrl: null,
-                            public_id: null,
-                          };
-                          setCourseCurriculumFormData(updated);
-                        }}
+                        onClick={()=> handleReplaceVideo(index)}
                       >
                         Replace Video
                       </Button>

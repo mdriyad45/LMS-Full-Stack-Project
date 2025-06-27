@@ -63,6 +63,25 @@ const CousrseSettings = () => {
   const handleDragOver = (e) => {
     e.preventDefault();
   };
+
+    const handleReplaceVideo = async (currentIndex)=>{
+      let copyCourseCurriculumFormData = [...CourseCurriculumFormData];
+      const getCurrentVideoId = copyCourseCurriculumFormData[currentIndex].video_id;
+      console.log(getCurrentVideoId);
+      const responseData = await removeVideoService(getCurrentVideoId);
+      console.log(responseData);
+      if(responseData.success){
+        const updated = [...CourseCurriculumFormData];
+        updated[currentIndex] = {
+          ...updated[currentIndex],
+          videoUrl: "",
+          public_id: "",
+          video_id: "",
+        }
+        setCourseCurriculumFormData(updated);
+      }
+      
+    }
   console.log(courseLandingFormData);
 
   return (
