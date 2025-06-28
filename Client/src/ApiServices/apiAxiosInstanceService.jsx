@@ -92,3 +92,13 @@ export const removeVideoService = async (publicId) => {
     console.error(error.message);
   }
 };
+export const removeThumnilImageService = async (_id) => {
+  try {
+    const { data } = await axiosInstance.delete(
+      `/api/v1/video/delete-thumnil-image/${_id}`
+    );
+    return data;
+  } catch (error) {
+    console.error(error.message);
+  }
+};

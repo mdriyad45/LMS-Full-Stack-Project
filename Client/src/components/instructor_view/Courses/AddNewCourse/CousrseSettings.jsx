@@ -1,16 +1,15 @@
-import { thumbnailUploadService } from "@/ApiServices/apiAxiosInstanceService";
+import { removeThumnilImageService, thumbnailUploadService } from "@/ApiServices/apiAxiosInstanceService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InstructorContext } from "@/context/instructor-context/InstructorProvider";
-import React, { useContext, } from "react";
+import React, { useContext, useRef } from "react";
 import CourseCurriculum from "./CourseCurriculum ";
 import MediaProgressBar from "@/components/MediaProgressBar/MediaProgressBar";
 import { Button } from "@/components/ui/button";
 
 const CousrseSettings = () => {
-
-
+  const inputRef = useRef(null);
   const {
     courseLandingFormData,
     setCourseLandingFormData,
@@ -22,7 +21,7 @@ const CousrseSettings = () => {
 
   const handleThumbnailUpload = async (fileOrEvent) => {
     const selectedFile = fileOrEvent?.target?.files[0] || fileOrEvent;
-    console.log(selectedFile);
+    
     if (!selectedFile) return;
 
     try {
@@ -38,11 +37,13 @@ const CousrseSettings = () => {
           setMediaUploadProgressPercentage(percent);
         }
       );
-
+      
       if (response.success) {
         const update = {
           ...courseLandingFormData,
-          image: response.data.secure_url,
+          imageUrl: response.data.thumbnailUrl,
+          _id: response.data._id,
+
         };
         setCourseLandingFormData(update);
       }
@@ -64,24 +65,40 @@ const CousrseSettings = () => {
     e.preventDefault();
   };
 
-    const handleReplaceVideo = async (currentIndex)=>{
-      let copyCourseCurriculumFormData = [...CourseCurriculumFormData];
-      const getCurrentVideoId = copyCourseCurriculumFormData[currentIndex].video_id;
-      console.log(getCurrentVideoId);
-      const responseData = await removeVideoService(getCurrentVideoId);
-      console.log(responseData);
-      if(responseData.success){
-        const updated = [...CourseCurriculumFormData];
-        updated[currentIndex] = {
-          ...updated[currentIndex],
-          videoUrl: "",
-          public_id: "",
-          video_id: "",
-        }
-        setCourseCurriculumFormData(updated);
-      }
+  const handleReplaceImage = async () => {
+    const input = document.createElement("input");
+    (input.type = "file"),
+      (input.accept = "image/*"),
+      (input.onchange = (e) => handleThumbnailUpload(e));
+    input.click();
+
+    const _id = { ...courseLandingFormData }._id;
+
+    const response = await removeThumnilImageService(_id);
+    console.log(response)
+    if(response.success){
+      const update = {...courseLandingFormData,
+        imageUrl: "",
+        _id: "",
+      };
+      setCourseLandingFormData(update);
       
     }
+  };
+    const handleDeleteImage = async () => {
+
+    const _id = { ...courseLandingFormData }._id;
+
+    const response = await removeThumnilImageService(_id);
+    console.log(response)
+    if(response.success){
+      const update = {...courseLandingFormData,
+        imageUrl: "",
+        _id: "",
+      };
+      setCourseLandingFormData(update);
+    }
+  };
   console.log(courseLandingFormData);
 
   return (
@@ -94,22 +111,35 @@ const CousrseSettings = () => {
           <div>
             <Label>Course Thumbnail Image</Label>
 
-            {courseLandingFormData?.image ? (
+            {courseLandingFormData?.imageUrl ? (
               <div className="flex gap-3">
                 <img
-                  src={courseLandingFormData.image || "/placeholder.svg"}
+                  src={courseLandingFormData.imageUrl || "/placeholder.svg"}
                   alt="Preview"
                   className="w-full max-w-xs mt-4 rounded-md shadow-md"
                 />
-                <Button className="bg-green-700 text-gray-50">Replace Video</Button>
-                <Button className="bg-red-800 text-gray-50">Delete Lecture</Button>
+                <Button
+                  onClick={() => {
+                    handleReplaceImage();
+                  }}
+                  className="bg-green-700 text-gray-50"
+                >
+                  Replace Video
+                </Button>
+                <Button onClick={()=>{handleDeleteImage()}} className="bg-red-800 text-gray-50">
+                  Delete Lecture
+                </Button>
               </div>
             ) : (
               <div className="mt-4 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-            
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="w-8 h-8 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -120,14 +150,13 @@ const CousrseSettings = () => {
                   </div>
                 </div>
 
-              
                 <div className="space-y-4">
                   <div className="relative inline-block">
                     <Input
                       type="file"
                       accept="image/*"
                       onChange={(event) => {
-                        handleThumbnailUpload(event)
+                        handleThumbnailUpload(event);
                       }}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
@@ -137,10 +166,13 @@ const CousrseSettings = () => {
                     <span className="ml-3 text-gray-500">No file chosen</span>
                   </div>
 
-                
                   <div className="space-y-1">
-                    <p className="text-gray-600">Or drag and drop an image file here</p>
-                    <p className="text-sm text-gray-400">Supported: JPEG, PNG, GIF, WebP (Max 5MB)</p>
+                    <p className="text-gray-600">
+                      Or drag and drop an image file here
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      Supported: JPEG, PNG, GIF, WebP (Max 5MB)
+                    </p>
                   </div>
                 </div>
               </div>
@@ -156,7 +188,6 @@ const CousrseSettings = () => {
         </CardContent>
       </Card>
     </div>
-  
   );
 };
 

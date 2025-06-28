@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
 
+  deleteThumnailImageFromCloudinary,
   deleteVideoFromCloudinary,
   getVideoStreamingUrl,
   uploadImageToCloudinaryController,
@@ -15,6 +16,7 @@ const router = Router();
 router.route("/upload").post(authMiddleware,uploadVideo.single('video'),uploadVideoController);
 router.route("/getVideo/:videoId").get(authMiddleware, getVideoStreamingUrl);
 router.route("/deleteVideo/:videoId").delete(authMiddleware, deleteVideoFromCloudinary);
+router.route("/delete-thumnil-image/:_id").delete(authMiddleware, deleteThumnailImageFromCloudinary);
 router.route('/image/upload').post(authMiddleware,uploadImage.single('image'),uploadImageToCloudinaryController)
 
 export default router;

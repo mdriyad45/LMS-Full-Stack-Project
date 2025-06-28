@@ -153,7 +153,8 @@ export const courseLandingInitialFormData = {
   pricing: "",
   objectives: "",
   welcomeMessage: "",
-  image: "",
+  imageUrl: "",
+  _id: "",
 };
 
 export const courseCurriculumInitialFormData = [
@@ -162,7 +163,7 @@ export const courseCurriculumInitialFormData = [
     videoUrl: "",
     freePreview: false,
     public_id: "",
-    video_id: "",
+    _id: "",
   },
 ];
 

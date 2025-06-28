@@ -1,5 +1,6 @@
 import cloudinary from "../helper/cloudinary.js";
 import { CourseVideo } from "../models/courseVideoMOdel.js";
+import { thumbnailMOdel } from "../models/thumnilImage.model.js";
 import logger from "../utils/logger.js";
 
 export const uploadVideoController = async (req, res) => {
@@ -7,7 +8,6 @@ export const uploadVideoController = async (req, res) => {
 
   try {
     const { file } = req;
-    console.log(file);
 
     if (!file) {
       return res.status(400).json({
@@ -125,7 +125,6 @@ export const uploadImageToCloudinaryController = async (req, res) => {
   logger.info("api hit uploadImageToCloudinaryController");
   try {
     const { file } = req;
-    console.log(file);
 
     if (!file) {
       return res.status(400).json({
@@ -138,29 +137,32 @@ export const uploadImageToCloudinaryController = async (req, res) => {
       folder: "LMS_Learning_Project",
     });
 
-    if(!result){
+    if (!result) {
       return res.status(400).json({
         success: false,
         message: "Cloudinary Image Upload fail",
       });
     }
 
-     res.status(200).json({
-      success: true,
-      message: "Image uploaded successfully",
-      data: result,
-      
+    const storeData = await thumbnailMOdel.create({
+      public_id: result.public_id,
+      thumbnailUrl: result.secure_url,
+      uploadedBy: req.user._id,
     });
 
+    res.status(200).json({
+      success: true,
+      message: "Image uploaded successfully",
+      data: storeData,
+    });
   } catch (error) {
-    logger.error("Image upload failed:", error.message);
+    logger.error("Image upload failed:", error);
     res.status(500).json({
       success: false,
       message: "Image upload failed",
       error: error.message,
     });
   }
-  
 };
 
 export const getVideoStreamingUrl = async (req, res) => {
@@ -224,6 +226,7 @@ export const deleteVideoFromCloudinary = async (req, res) => {
 
   try {
     const { videoId } = req.params;
+    console.log("videoId:", videoId);
 
     if (!videoId) {
       return res.status(400).json({
@@ -233,6 +236,7 @@ export const deleteVideoFromCloudinary = async (req, res) => {
     }
 
     const video = await CourseVideo.findById(videoId);
+    console.log("video: ", video);
     if (!video) {
       return res.status(404).json({
         success: false,
@@ -242,7 +246,8 @@ export const deleteVideoFromCloudinary = async (req, res) => {
 
     const videoPublicId = video.public_id;
 
-    await CourseVideo.findByIdAndDelete(videoId);
+    console.log("videoPublicId:", videoPublicId);
+
     logger.info(`Deleted video metadata from DB: ${videoId}`);
 
     const cloudinaryResponse = await cloudinary.uploader.destroy(
@@ -252,6 +257,11 @@ export const deleteVideoFromCloudinary = async (req, res) => {
       }
     );
 
+    console.log("cloudinary Response: ", cloudinaryResponse);
+
+    if (cloudinaryResponse.result === "ok") {
+      await CourseVideo.findByIdAndDelete(videoId);
+    }
     if (
       cloudinaryResponse.result !== "ok" &&
       cloudinaryResponse.result !== "not found"
@@ -268,10 +278,74 @@ export const deleteVideoFromCloudinary = async (req, res) => {
       message: "Video deleted successfully from both database and Cloudinary",
     });
   } catch (error) {
-    logger.error("Error deleting video:", error.message);
+    logger.error("Error deleting video:", error);
     res.status(500).json({
       success: false,
       message: "Server error while deleting video",
+      error: error.message,
+    });
+  }
+};
+
+export const deleteThumnailImageFromCloudinary = async (req, res) => {
+  logger.info("API hit: deleteThumnailImageFromCloudinary");
+
+  try {
+    const { _id } = req.params;
+    console.log(_id);
+
+    if (!_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide image ID",
+      });
+    }
+
+    const image = await thumbnailMOdel.findById(_id);
+    console.log("image: ", image);
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+        message: "Image not found in the database",
+      });
+    }
+
+    const imagePublicId = image.public_id;
+    console.log("imagePublicId:", imagePublicId);
+
+    await thumbnailMOdel.findByIdAndDelete(_id);
+    logger.info(`Deleted image metadata from DB: ${_id}`);
+
+    const cloudinaryResponse = await cloudinary.uploader.destroy(
+      imagePublicId,
+      {
+        resource_type: "image",
+      }
+    );
+    console.log("cloudinaryResponse: ", cloudinaryResponse);
+    if (cloudinaryResponse.result === "ok") {
+      await thumbnailMOdel.findByIdAndDelete(_id);
+    }
+    if (
+      cloudinaryResponse.result !== "ok" &&
+      cloudinaryResponse.result !== "not found"
+    ) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete iamge from Cloudinary",
+        cloudinaryResponse,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "image deleted successfully from both database and Cloudinary",
+    });
+  } catch (error) {
+    logger.error("Error deleting image:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server error while deleting image",
       error: error.message,
     });
   }

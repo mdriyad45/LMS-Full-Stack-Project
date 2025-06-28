@@ -48,6 +48,9 @@ const videoCourseSchema = new mongoose.Schema(
     thumbnail: {
       type: String,
     },
+    thumbnail_public_id: {
+      type: String,
+    },
     
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,

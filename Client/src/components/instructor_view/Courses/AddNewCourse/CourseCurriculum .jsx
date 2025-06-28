@@ -1,4 +1,7 @@
-import { mediaUploadService, removeVideoService } from "@/ApiServices/apiAxiosInstanceService";
+import {
+  mediaUploadService,
+  removeVideoService,
+} from "@/ApiServices/apiAxiosInstanceService";
 import MediaProgressBar from "@/components/MediaProgressBar/MediaProgressBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,7 +68,7 @@ const CourseCurriculum = () => {
           ...updated[index],
           videoUrl: response.data.secure_url,
           public_id: response.data.public_id,
-          video_id: response.data._id,
+          _id: response.data._id,
         };
         setCourseCurriculumFormData(updated);
       }
@@ -99,26 +102,48 @@ const CourseCurriculum = () => {
       );
     });
   };
-  
-  const handleReplaceVideo = async (currentIndex)=>{
+
+  const handleReplaceVideo = async (currentIndex) => {
+    const input = document.createElement("input");
+    (input.type = "file"),
+      (input.accept = "video/*"),
+      (input.onchange = (event) =>
+        handleSingleLectureUpload(event, currentIndex));
+    input.click();
+
     let copyCourseCurriculumFormData = [...CourseCurriculumFormData];
-    const getCurrentVideoId = copyCourseCurriculumFormData[currentIndex].video_id;
-    console.log(getCurrentVideoId);
-    const responseData = await removeVideoService(getCurrentVideoId);
+    const _id = copyCourseCurriculumFormData[currentIndex]._id;
+
+    const responseData = await removeVideoService(_id);
     console.log(responseData);
-    if(responseData.success){
+    if (responseData.success) {
       const updated = [...CourseCurriculumFormData];
       updated[currentIndex] = {
         ...updated[currentIndex],
         videoUrl: "",
         public_id: "",
-        video_id: "",
-      }
+        _id: "",
+      };
       setCourseCurriculumFormData(updated);
     }
-    
-  }
-  console.log(CourseCurriculumFormData)
+  };
+  const handleDeleteVideo = async (currentIndex) => {
+    let copyCourseCurriculumFormData = [...CourseCurriculumFormData];
+    const _id = copyCourseCurriculumFormData[currentIndex]._id;
+
+    const responseData = await removeVideoService(_id);
+    if (responseData.success) {
+      const updated = [...CourseCurriculumFormData];
+      updated[currentIndex] = {
+        ...updated[currentIndex],
+        videoUrl: "",
+        public_id: "",
+        _id: "",
+      };
+      setCourseCurriculumFormData(updated);
+    }
+  };
+
   return (
     <div className="max-w-9xl mx-auto p-4">
       <Card>
@@ -172,16 +197,14 @@ const CourseCurriculum = () => {
                       />
                       <Button
                         className="bg-green-700 text-gray-50"
-                        onClick={()=> handleReplaceVideo(index)}
+                        onClick={() => handleReplaceVideo(index)}
                       >
                         Replace Video
                       </Button>
                       <Button
                         className="bg-red-800 text-gray-50"
                         onClick={() => {
-                          const updated = [...CourseCurriculumFormData];
-                          updated.splice(index, 1);
-                          setCourseCurriculumFormData(updated);
+                          handleDeleteVideo(index);
                         }}
                       >
                         Delete Lecture
